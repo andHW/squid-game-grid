@@ -28,7 +28,7 @@ body {
     height: 60px;
     background-color: white;
     overflow: hidden;
-    margin: 5px;
+    margin: 3px;
 }
 
 .square.gone {
