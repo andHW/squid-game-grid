@@ -38,7 +38,7 @@ body {
 
 .pic {
     filter: grayscale(1);
-    background-image: url('/456.webp');
+    background-image: url('456.webp');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
