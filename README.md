@@ -2,6 +2,8 @@
 
 A simple web representation of the Squid Game Grid.
 
+[The demo can be found here](https://andhw.github.io/squid-game-grid/).
+
 Designed to be responsive.
 
 Just a POC, the code is inelegant.
