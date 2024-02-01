@@ -19,11 +19,14 @@ body {
 
 #screen {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     transform: rotate(-45deg);
 }
 
 .square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 60px;
     height: 60px;
     background-color: white;
@@ -52,12 +55,7 @@ body {
     color: cyan;
     opacity: 0.6;
     text-shadow: 0 0 2px #000;
-    transform: rotate(45deg);
     font-size: 1.5em;
-    /* TODO: Need a better way to center the text... */
-    text-align: center;
-    position: relative;
-    bottom: 25px;
-    right: 18px;
-    user-select: none;
+    position: absolute;
+    transform: rotate(45deg) translateY(100%);
 }
