@@ -30,11 +30,18 @@ body {
     background-color: white;
     overflow: hidden;
     margin: 3px;
+    cursor: crosshair;
+}
+
+.square.empty {
+    opacity: 0;
+    cursor: default;
 }
 
 .square.gone {
     opacity: 0;
-    transition: all 0.5s ease-in-out;
+    transition: all 0.25s ease-in-out;
+    cursor: grab;
 }
 
 .pic {

@@ -18,7 +18,7 @@ function genSquares() {
         squareDiv.classList.add("square");
 
         if (nums[i] > NUM_OF_PLAYERS) {
-            squareDiv.classList.add("gone");
+            squareDiv.classList.add("empty");
             screen.appendChild(squareDiv);
             continue;
         }
@@ -33,7 +33,11 @@ function genSquares() {
         squareDiv.appendChild(picDiv);
         squareDiv.appendChild(textDiv);
 
+        // TODO: decouple this
         squareDiv.addEventListener("click", function () {
+            if (!this.classList.contains("gone")) {
+                new Audio("sg-sound-effect.ogg").play();
+            }
             this.classList.toggle("gone");
         });
 
