@@ -19,7 +19,6 @@ body {
 
 #screen {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
     transform: rotate(-45deg);
 }
 
@@ -27,8 +26,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 60px;
-    height: 60px;
+    aspect-ratio: 1 / 1;
     background-color: white;
     overflow: hidden;
     margin: 3px;
@@ -55,7 +53,5 @@ body {
     color: cyan;
     opacity: 0.6;
     text-shadow: 0 0 2px #000;
-    font-size: 1.5em;
     position: absolute;
-    transform: rotate(45deg) translateY(100%);
 }
