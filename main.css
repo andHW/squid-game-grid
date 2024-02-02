@@ -44,7 +44,7 @@ body {
 }
 
 .pic {
-    filter: grayscale(1);
+    filter: grayscale(.75);
     background-image: url('456.webp');
     background-size: cover;
     background-repeat: no-repeat;
