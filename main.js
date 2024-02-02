@@ -94,13 +94,14 @@ function resetDimensions(style, squareSideSize) {
         style.sheet.deleteRule(0);
     }
 
-    let vx = Math.floor(100 / (squareSideSize + 3)) - 1;
-    let use_vw_or_vh = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
+    let squareDiagonal = Math.ceil((squareSideSize + .5) * Math.sqrt(2));
+    let vx = Math.floor(100 / (squareDiagonal));
+    let useVWorVH = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
 
     // insert rule into style
-    style.sheet.insertRule(`.square {height: ${vx}${use_vw_or_vh};}`);
-    style.sheet.insertRule(`.text {transform: rotate(45deg) translateY(${vx / 3}${use_vw_or_vh});}`);
-    style.sheet.insertRule(`.text {font-size: ${vx / 3}${use_vw_or_vh};}`);
+    style.sheet.insertRule(`.square {height: ${vx}${useVWorVH}; margin: ${vx / 40}${useVWorVH};}`);
+    style.sheet.insertRule(`.text {transform: rotate(45deg) translateY(${vx / 3}${useVWorVH});}`);
+    style.sheet.insertRule(`.text {font-size: ${vx / 3}${useVWorVH};}`);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
