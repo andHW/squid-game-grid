@@ -47,7 +47,7 @@ function genSquares() {
 }
 
 let style = document.createElement('style');
-function setDimensions() {
+function resetDimensions() {
     let screen = document.getElementById("screen");
     screen.style.gridTemplateColumns = `repeat(${SQUARE_SIDE_SIZE}, 1fr)`;
 
@@ -57,7 +57,7 @@ function setDimensions() {
     }
 
     let vx = Math.floor(100 / (SQUARE_SIDE_SIZE + 3)) - 1;
-    let use_vw_or_vh = window.screen.height < window.screen.width ? "vh" : "vw";
+    let use_vw_or_vh = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
 
     // insert rule into style
     style.sheet.insertRule(`.square {height: ${vx}${use_vw_or_vh};}`);
@@ -69,9 +69,9 @@ document.addEventListener("DOMContentLoaded", function () {
     genSquares();
 
     document.head.appendChild(style);
-    setDimensions();
+    resetDimensions();
 
     onresize = (event) => {
-        setDimensions();
+        resetDimensions();
     };
 });
