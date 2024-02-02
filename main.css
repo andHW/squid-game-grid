@@ -44,7 +44,7 @@ body {
 }
 
 .pic {
-    filter: grayscale(.75);
+    filter: grayscale(.9);
     background-image: url('456.webp');
     background-size: cover;
     background-repeat: no-repeat;
@@ -57,7 +57,7 @@ body {
 .text {
     font-weight: bold;
     color: cyan;
-    opacity: 0.6;
+    opacity: 0.65;
     text-shadow: 0 0 2px #000;
     position: absolute;
 }

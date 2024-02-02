@@ -61,13 +61,15 @@ function genSquares(players) {
             continue;
         }
 
+        let player = players[nums[i] - 1];
+
         let picDiv = document.createElement("div");
         picDiv.classList.add("pic");
-        picDiv.style.backgroundImage = `url(${players[nums[i] - 1].getPicUrl()})`;
+        picDiv.style.backgroundImage = `url(${player.getPicUrl()})`;
 
         let textDiv = document.createElement("div");
         textDiv.classList.add("text");
-        textDiv.textContent = nums[i].toString().padStart(3, "0");
+        textDiv.textContent = player.getId().toString().padStart(3, "0");
 
         squareDiv.appendChild(picDiv);
         squareDiv.appendChild(textDiv);
