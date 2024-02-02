@@ -1,23 +1,61 @@
-const NUM_OF_PLAYERS = 37;
-const SQUARE_SIDE_SIZE = Math.ceil(Math.sqrt(NUM_OF_PLAYERS));
-const NUM_OF_SQUARES = SQUARE_SIDE_SIZE ** 2;
+import Player from "./player.js";
 
-let nums = Array.from({ length: NUM_OF_SQUARES }, (_, i) => i + 1);
+const DEFAULT_NUM_OF_PLAYERS = 37;
 
-// shuffle nums
-for (let i = 0; i < NUM_OF_SQUARES; i++) {
-    let j = Math.floor(Math.random() * NUM_OF_SQUARES);
-    [nums[i], nums[j]] = [nums[j], nums[i]];
+async function main() {
+    let players = await initPlayers();
+    genSquares(players);
+
+    let squareSideSize = Math.ceil(Math.sqrt(players.length));
+    let style = document.createElement('style');
+    document.head.appendChild(style);
+    resetDimensions(style, squareSideSize);
+    onresize = (event) => {
+        resetDimensions(style, squareSideSize);
+    };
 }
 
-function genSquares() {
+async function initPlayers() {
+    let players = [];
+
+    await fetch("config.json")
+        .then(response => response.json())
+        .then(json => {
+            json.players.forEach((player) => {
+                players.push(new Player(player.id, player.picUrl));
+            });
+        })
+        .catch((e) => {
+            console.log("config.json not found, using default players");
+            for (let i = 1; i <= DEFAULT_NUM_OF_PLAYERS; i++) {
+                players.push(new Player(i, "456.webp"));
+            }
+        });
+
+    return players;
+}
+
+
+function genSquares(players) {
+    let numOfPlayers = players.length;
+    let squareSideSize = Math.ceil(Math.sqrt(numOfPlayers));
+    let numOfSquares = squareSideSize ** 2;
+
+    let nums = Array.from({ length: numOfSquares }, (_, i) => i + 1);
+
+    // shuffle nums
+    for (let i = 0; i < numOfSquares; i++) {
+        let j = Math.floor(Math.random() * numOfSquares);
+        [nums[i], nums[j]] = [nums[j], nums[i]];
+    }
+
     let screen = document.getElementById("screen");
 
-    for (let i = 0; i < NUM_OF_SQUARES; i++) {
+    for (let i = 0; i < numOfSquares; i++) {
         let squareDiv = document.createElement("div");
         squareDiv.classList.add("square");
 
-        if (nums[i] > NUM_OF_PLAYERS) {
+        if (nums[i] > numOfPlayers) {
             squareDiv.classList.add("empty");
             screen.appendChild(squareDiv);
             continue;
@@ -25,6 +63,7 @@ function genSquares() {
 
         let picDiv = document.createElement("div");
         picDiv.classList.add("pic");
+        picDiv.style.backgroundImage = `url(${players[nums[i] - 1].getPicUrl()})`;
 
         let textDiv = document.createElement("div");
         textDiv.classList.add("text");
@@ -46,17 +85,16 @@ function genSquares() {
 
 }
 
-let style = document.createElement('style');
-function resetDimensions() {
+function resetDimensions(style, squareSideSize) {
     let screen = document.getElementById("screen");
-    screen.style.gridTemplateColumns = `repeat(${SQUARE_SIDE_SIZE}, 1fr)`;
+    screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
 
     //remove all rules from style
     while (style.sheet.cssRules.length > 0) {
         style.sheet.deleteRule(0);
     }
 
-    let vx = Math.floor(100 / (SQUARE_SIDE_SIZE + 3)) - 1;
+    let vx = Math.floor(100 / (squareSideSize + 3)) - 1;
     let use_vw_or_vh = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
 
     // insert rule into style
@@ -66,12 +104,5 @@ function resetDimensions() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    genSquares();
-
-    document.head.appendChild(style);
-    resetDimensions();
-
-    onresize = (event) => {
-        resetDimensions();
-    };
+    main();
 });

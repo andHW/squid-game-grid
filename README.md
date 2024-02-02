@@ -6,11 +6,24 @@ A simple web representation of the Squid Game Grid.
 
 Designed to be responsive.
 
-Just a POC, the code is inelegant.
+Just a POC, the code is very inelegant and disregarded broswer compatibility.
 
 ## Config
 
-See [main.js](main.js) to set the `NUM_OF_PLAYERS`.
+See [main.js](main.js) to set the `DEFAULT_NUM_OF_PLAYERS`.
+
+You may also upload a `config.json` file in the following format:
+
+```json
+{
+    "players": [
+        {
+            "id": 1,
+            "picUrl": "456.webp"
+        },
+    ]
+}
+```
 
 Only 1 to 100 are tested.
 
