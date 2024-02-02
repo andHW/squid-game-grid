@@ -62,6 +62,7 @@ function genSquares(players) {
         }
 
         let player = players[nums[i] - 1];
+        squareDiv.setAttribute("playerId", player.getId());
 
         let picDiv = document.createElement("div");
         picDiv.classList.add("pic");
@@ -74,17 +75,27 @@ function genSquares(players) {
         squareDiv.appendChild(picDiv);
         squareDiv.appendChild(textDiv);
 
-        // TODO: decouple this
         squareDiv.addEventListener("click", function () {
-            if (!this.classList.contains("gone")) {
-                new Audio("sg-sound-effect.ogg").play();
-            }
-            this.classList.toggle("gone");
+            togglePlayer(this);
         });
 
         screen.appendChild(squareDiv);
     }
 
+}
+
+function togglePlayer(squareElm) {
+    if (squareElm.classList.contains("gone")) {
+        squareElm.classList.remove("gone");
+        return;
+    }
+    new Audio("sg-sound-effect.ogg").play();
+    squareElm.classList.add("gone");
+}
+
+function togglePlayerById(playerId) {
+    let square = document.querySelector(`.square[playerId="${playerId}"]`);
+    togglePlayer(square);
 }
 
 function resetDimensions(style, squareSideSize) {
