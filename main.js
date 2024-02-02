@@ -1,6 +1,7 @@
 import Player from "./player.js";
 
 const DEFAULT_NUM_OF_PLAYERS = 37;
+const CONFIG_PATH = "config.json";
 
 async function main() {
     let players = await initPlayers();
@@ -18,7 +19,7 @@ async function main() {
 async function initPlayers() {
     let players = [];
 
-    await fetch("config.json")
+    await fetch(CONFIG_PATH)
         .then(response => response.json())
         .then(json => {
             json.players.forEach((player) => {
