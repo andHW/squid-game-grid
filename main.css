@@ -19,7 +19,7 @@ body {
 
 #screen {
     display: grid;
-    transform: rotate(-45deg);
+    rotate: -45deg;
 }
 
 .square {
@@ -39,8 +39,7 @@ body {
 
 .square.gone {
     opacity: 0;
-    transition: all 0.25s ease-in-out;
-    cursor: grab;
+    transition: opacity 0.15s ease-in-out;
 }
 
 .pic {
@@ -51,8 +50,9 @@ body {
     background-position: center center;
     width: 100%;
     height: 100%;
+    rotate: 45deg;
     /* √2 */
-    transform: rotate(45deg) scale(1.42);
+    scale: 1.42;
 }
 
 .text {
@@ -61,4 +61,10 @@ body {
     opacity: 0.65;
     text-shadow: 0 0 2px #000;
     position: absolute;
+    transition: fonts-size .5s;
+}
+
+.square,
+.pic {
+    transition: all .5s;
 }
