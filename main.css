@@ -63,6 +63,7 @@ body {
     text-shadow: 0 0 2px #000;
     position: absolute;
     transition: fonts-size .5s;
+    user-select: none;
 }
 
 .square,
