@@ -6,10 +6,10 @@ class Game {
     constructor(players, screenElm) {
         this.players = players;
         this.screenElm = screenElm;
-        this.refreshScreen();
+        this.#refreshScreen();
 
         onresize = (event) => {
-            this.resetDimensions();
+            this.#resetDimensions();
         };
     }
 
@@ -17,10 +17,10 @@ class Game {
     #resurrectAllPlayers = () => this.players.forEach((player) => player.setAlive(true));
 
     // some squares may be empty if the number of players is not a perfect square (e.g. 37 players, 7x7 grid, 12 empty squares)
-    getSquareSideSize = () => Math.ceil(Math.sqrt(this.players.length));
+    #getSquareSideSize = () => Math.ceil(Math.sqrt(this.players.length));
 
-    resetDimensions = () => {
-        let squareSideSize = this.getSquareSideSize();
+    #resetDimensions = () => {
+        let squareSideSize = this.#getSquareSideSize();
         let screen = this.screenElm;
         screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
 
@@ -51,13 +51,13 @@ class Game {
 
         // reset game if only one player is left
         this.#resurrectAllPlayers();
-        this.refreshScreen();
+        this.#refreshScreen();
         new Audio("sg-sound-effect-rev.ogg").play();
     }
 
-    refreshScreen() {
+    #refreshScreen() {
         this.screenElm.innerHTML = "";
-        let numOfSquares = this.getSquareSideSize() ** 2;
+        let numOfSquares = this.#getSquareSideSize() ** 2;
 
         let squaresOrder = Array.from({ length: numOfSquares }, (_, i) => i);
         squaresOrder.sort(() => Math.random() - 0.5);
@@ -93,31 +93,13 @@ class Game {
 
             this.screenElm.appendChild(squareDiv);
         }
-        this.resetDimensions();
+        this.#resetDimensions();
     }
 }
 
 async function main() {
     let players = await genPlayers(CONFIG_PATH);
-    let game = new Game(players, document.getElementById("screen"));
-}
-
-function foo(squareSideSize) {
-    let screen = document.getElementById("screen");
-    screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
-
-    let squareDiagonal = Math.ceil((squareSideSize + .5) * Math.sqrt(2));
-    let vx = Math.floor(100 / (squareDiagonal));
-    let useVWorVH = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
-
-    let squares = document.querySelectorAll(".square");
-    squares.forEach((square) => { square.style.height = `${vx}${useVWorVH}`; square.style.margin = `${vx / 40}${useVWorVH}`; });
-
-    let text = document.querySelectorAll(".text");
-    text.forEach((text) => {
-        text.style.transform = `rotate(45deg) translateY(${vx / 3}${useVWorVH})`;
-        text.style.fontSize = `${vx / 3}${useVWorVH}`;
-    });
+    new Game(players, document.getElementById("screen"));
 }
 
 document.addEventListener("DOMContentLoaded", function () {
