@@ -27,6 +27,12 @@ You may also upload a `config.json` file in the following format:
 
 Only 1 to 100 are tested.
 
+## Handy debugging commands
+
+```js
+[...document.querySelectorAll(".square:not(.gone, .empty)")].slice(0,-1).forEach((e)=>e.click());
+```
+
 ## Ideas
 
 - Save the state of the game to a cookie.

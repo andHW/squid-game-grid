@@ -1,3 +1,5 @@
+// should create a Game object to manintain states and handle events better
+
 import Player from "./player.js";
 
 const DEFAULT_NUM_OF_PLAYERS = 37;
@@ -8,11 +10,10 @@ async function main() {
     genSquares(players);
 
     let squareSideSize = Math.ceil(Math.sqrt(players.length));
-    let style = document.createElement('style');
-    document.head.appendChild(style);
-    resetDimensions(style, squareSideSize);
+
+    resetDimensions(squareSideSize);
     onresize = (event) => {
-        resetDimensions(style, squareSideSize);
+        resetDimensions(squareSideSize);
     };
 }
 
@@ -51,18 +52,19 @@ function genSquares(players) {
     }
 
     let screen = document.getElementById("screen");
+    screen.innerHTML = "";
 
     for (let i = 0; i < numOfSquares; i++) {
         let squareDiv = document.createElement("div");
         squareDiv.classList.add("square");
+        let player = players[nums[i] - 1];
 
-        if (nums[i] > numOfPlayers) {
+        if (nums[i] > numOfPlayers || player.isEliminated()) {
             squareDiv.classList.add("empty");
             screen.appendChild(squareDiv);
             continue;
         }
 
-        let player = players[nums[i] - 1];
         squareDiv.setAttribute("playerId", player.getId());
 
         let picDiv = document.createElement("div");
@@ -85,13 +87,29 @@ function genSquares(players) {
 
 }
 
-function togglePlayer(squareElm) {
+async function togglePlayer(squareElm) {
     if (squareElm.classList.contains("gone")) {
-        squareElm.classList.remove("gone");
         return;
     }
-    new Audio("sg-sound-effect.ogg").play();
-    squareElm.classList.add("gone");
+
+    // reset all squares if all squares are gone
+    let numOfRemainingSquares = document.querySelectorAll(".square:not(.gone, .empty)").length;
+
+    if (numOfRemainingSquares > 1) {
+        new Audio("sg-sound-effect.ogg").play();
+        squareElm.classList.add("gone");
+        return;
+    }
+
+    if (numOfRemainingSquares === 1) {
+        let players = await initPlayers();
+        genSquares(players);
+        let squareSideSize = Math.ceil(Math.sqrt(players.length));
+        resetDimensions(squareSideSize);
+
+        new Audio("sg-sound-effect-rev.ogg").play();
+        return;
+    }
 }
 
 function togglePlayerById(playerId) {
@@ -99,25 +117,27 @@ function togglePlayerById(playerId) {
     togglePlayer(square);
 }
 
-function resetDimensions(style, squareSideSize) {
+function resetDimensions(squareSideSize) {
     let screen = document.getElementById("screen");
     screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
-
-    //remove all rules from style
-    while (style.sheet.cssRules.length > 0) {
-        style.sheet.deleteRule(0);
-    }
 
     let squareDiagonal = Math.ceil((squareSideSize + .5) * Math.sqrt(2));
     let vx = Math.floor(100 / (squareDiagonal));
     let useVWorVH = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
 
-    // insert rule into style
-    style.sheet.insertRule(`.square {height: ${vx}${useVWorVH}; margin: ${vx / 40}${useVWorVH};}`);
-    style.sheet.insertRule(`.text {transform: rotate(45deg) translateY(${vx / 3}${useVWorVH});}`);
-    style.sheet.insertRule(`.text {font-size: ${vx / 3}${useVWorVH};}`);
+    let squares = document.querySelectorAll(".square");
+    squares.forEach((square) => { square.style.height = `${vx}${useVWorVH}`; square.style.margin = `${vx / 40}${useVWorVH}`; });
+
+    let text = document.querySelectorAll(".text");
+    text.forEach((text) => {
+        text.style.transform = `rotate(45deg) translateY(${vx / 3}${useVWorVH})`;
+        text.style.fontSize = `${vx / 3}${useVWorVH}`;
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     main();
 });
+
+// for debugging
+window.resetDimensions = resetDimensions;
