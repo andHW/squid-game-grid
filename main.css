@@ -40,6 +40,7 @@ body {
 .square.gone {
     opacity: 0;
     transition: opacity 0.15s ease-in-out;
+    cursor: default;
 }
 
 .pic {
