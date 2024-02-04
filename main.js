@@ -90,7 +90,7 @@ class Game {
 
             let order = squaresOrder[i];
 
-            if (order >= this.players.length) {
+            if (order == -1 || order >= this.players.length) {
                 squareDiv.classList.add("empty");
                 this.screenElm.appendChild(squareDiv);
                 continue;
