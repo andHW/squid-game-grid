@@ -1,123 +1,108 @@
-// should create a Game object to manintain states and handle events better
+import { genPlayers } from "./player.js";
 
-import Player from "./player.js";
-
-const DEFAULT_NUM_OF_PLAYERS = 37;
 const CONFIG_PATH = "config.json";
 
-async function main() {
-    let players = await initPlayers();
-    genSquares(players);
+class Game {
+    constructor(players, screenElm) {
+        this.players = players;
+        this.screenElm = screenElm;
+        this.refreshScreen();
 
-    let squareSideSize = Math.ceil(Math.sqrt(players.length));
-
-    resetDimensions(squareSideSize);
-    onresize = (event) => {
-        resetDimensions(squareSideSize);
-    };
-}
-
-async function initPlayers() {
-    let players = [];
-
-    await fetch(CONFIG_PATH)
-        .then(response => response.json())
-        .then(json => {
-            json.players.forEach((player) => {
-                players.push(new Player(player.id, player.picUrl));
-            });
-        })
-        .catch((e) => {
-            console.log("config.json not found, using default players");
-            for (let i = 1; i <= DEFAULT_NUM_OF_PLAYERS; i++) {
-                players.push(new Player(i, "456.webp"));
-            }
-        });
-
-    return players;
-}
-
-
-function genSquares(players) {
-    let numOfPlayers = players.length;
-    let squareSideSize = Math.ceil(Math.sqrt(numOfPlayers));
-    let numOfSquares = squareSideSize ** 2;
-
-    let nums = Array.from({ length: numOfSquares }, (_, i) => i + 1);
-
-    // shuffle nums
-    for (let i = 0; i < numOfSquares; i++) {
-        let j = Math.floor(Math.random() * numOfSquares);
-        [nums[i], nums[j]] = [nums[j], nums[i]];
+        onresize = (event) => {
+            this.resetDimensions();
+        };
     }
 
-    let screen = document.getElementById("screen");
-    screen.innerHTML = "";
+    #getNumOfAlivePlayers = () => this.players.filter((player) => player.isAlive()).length;
+    #resurrectAllPlayers = () => this.players.forEach((player) => player.setAlive(true));
 
-    for (let i = 0; i < numOfSquares; i++) {
-        let squareDiv = document.createElement("div");
-        squareDiv.classList.add("square");
-        let player = players[nums[i] - 1];
+    // some squares may be empty if the number of players is not a perfect square (e.g. 37 players, 7x7 grid, 12 empty squares)
+    getSquareSideSize = () => Math.ceil(Math.sqrt(this.players.length));
 
-        if (nums[i] > numOfPlayers || player.isEliminated()) {
-            squareDiv.classList.add("empty");
-            screen.appendChild(squareDiv);
-            continue;
+    resetDimensions = () => {
+        let squareSideSize = this.getSquareSideSize();
+        let screen = this.screenElm;
+        screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
+
+        let squareDiagonal = Math.ceil((squareSideSize + .5) * Math.sqrt(2));
+        let vx = Math.floor(100 / (squareDiagonal));
+        let useVWorVH = document.documentElement.clientHeight < document.documentElement.clientWidth ? "vh" : "vw";
+
+        let squares = screen.querySelectorAll(".square");
+        squares.forEach((square) => { square.style.height = `${vx}${useVWorVH}`; square.style.margin = `${vx / 40}${useVWorVH}`; });
+
+        let text = screen.querySelectorAll(".text");
+        text.forEach((text) => {
+            text.style.transform = `rotate(45deg) translateY(${vx / 3}${useVWorVH})`;
+            text.style.fontSize = `${vx / 3}${useVWorVH}`;
+        });
+    }
+
+    #clickSquare(squareElm, playerId) {
+        if (squareElm.classList.contains("gone")) {
+            return;
+        }
+        this.players[playerId].setAlive(false);
+        if (this.#getNumOfAlivePlayers() > 0) {
+            new Audio("sg-sound-effect.ogg").play();
+            squareElm.classList.add("gone");
+            return;
         }
 
-        squareDiv.setAttribute("playerId", player.getId());
-
-        let picDiv = document.createElement("div");
-        picDiv.classList.add("pic");
-        picDiv.style.backgroundImage = `url(${player.getPicUrl()})`;
-
-        let textDiv = document.createElement("div");
-        textDiv.classList.add("text");
-        textDiv.textContent = player.getId().toString().padStart(3, "0");
-
-        squareDiv.appendChild(picDiv);
-        squareDiv.appendChild(textDiv);
-
-        squareDiv.addEventListener("click", function () {
-            togglePlayer(this);
-        });
-
-        screen.appendChild(squareDiv);
-    }
-
-}
-
-async function togglePlayer(squareElm) {
-    if (squareElm.classList.contains("gone")) {
-        return;
-    }
-
-    // reset all squares if all squares are gone
-    let numOfRemainingSquares = document.querySelectorAll(".square:not(.gone, .empty)").length;
-
-    if (numOfRemainingSquares > 1) {
-        new Audio("sg-sound-effect.ogg").play();
-        squareElm.classList.add("gone");
-        return;
-    }
-
-    if (numOfRemainingSquares === 1) {
-        let players = await initPlayers();
-        genSquares(players);
-        let squareSideSize = Math.ceil(Math.sqrt(players.length));
-        resetDimensions(squareSideSize);
-
+        // reset game if only one player is left
+        this.#resurrectAllPlayers();
+        this.refreshScreen();
         new Audio("sg-sound-effect-rev.ogg").play();
-        return;
+    }
+
+    refreshScreen() {
+        this.screenElm.innerHTML = "";
+        let numOfSquares = this.getSquareSideSize() ** 2;
+
+        let squaresOrder = Array.from({ length: numOfSquares }, (_, i) => i);
+        squaresOrder.sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < numOfSquares; i++) {
+            let squareDiv = document.createElement("div");
+            squareDiv.classList.add("square");
+
+            let order = squaresOrder[i];
+
+            if (order >= this.players.length) {
+                squareDiv.classList.add("empty");
+                this.screenElm.appendChild(squareDiv);
+                continue;
+            }
+
+            let player = this.players[order];
+
+            squareDiv.setAttribute("playerNumber", player.getNumber());
+
+            let picDiv = document.createElement("div");
+            picDiv.classList.add("pic");
+            picDiv.style.backgroundImage = `url(${player.getPicUrl()})`;
+
+            let textDiv = document.createElement("div");
+            textDiv.classList.add("text");
+            textDiv.textContent = player.getNumber().toString().padStart(3, "0");
+
+            squareDiv.appendChild(picDiv);
+            squareDiv.appendChild(textDiv);
+
+            squareDiv.addEventListener("click", this.#clickSquare.bind(this, squareDiv, order));
+
+            this.screenElm.appendChild(squareDiv);
+        }
+        this.resetDimensions();
     }
 }
 
-function togglePlayerById(playerId) {
-    let square = document.querySelector(`.square[playerId="${playerId}"]`);
-    togglePlayer(square);
+async function main() {
+    let players = await genPlayers(CONFIG_PATH);
+    let game = new Game(players, document.getElementById("screen"));
 }
 
-function resetDimensions(squareSideSize) {
+function foo(squareSideSize) {
     let screen = document.getElementById("screen");
     screen.style.gridTemplateColumns = `repeat(${squareSideSize}, 1fr)`;
 
@@ -138,6 +123,3 @@ function resetDimensions(squareSideSize) {
 document.addEventListener("DOMContentLoaded", function () {
     main();
 });
-
-// for debugging
-window.resetDimensions = resetDimensions;

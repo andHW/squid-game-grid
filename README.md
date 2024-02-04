@@ -6,7 +6,7 @@ A simple web representation of the Squid Game Grid.
 
 Designed to be responsive.
 
-Just a POC, the code is very inelegant and disregarded broswer compatibility.
+Just a POC, the code is not very nelegant and disregarded broswer compatibility.
 
 ## Config
 
@@ -18,7 +18,7 @@ You may also upload a `config.json` file in the following format:
 {
     "players": [
         {
-            "id": 1,
+            "number": 1,
             "picUrl": "456.webp"
         },
     ]
