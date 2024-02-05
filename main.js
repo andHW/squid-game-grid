@@ -1,6 +1,6 @@
 import { genPlayers } from "./player.js";
 
-const CONFIG_PATH = "squid-game-config.json";
+const CONFIG_PATH = "config.json";
 const USE_PROGRESSIVE_SQUARE = true;
 const AUTO_RUNNING = true;
 
