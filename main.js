@@ -1,14 +1,25 @@
 import { genPlayers } from "./player.js";
 
-const CONFIG_PATH = "config.json";
+const CONFIG_PATH = "squid-game-config.json";
+const USE_PROGRESSIVE_SQUARE = true;
+const AUTO_RUNNING = true;
 
 class Game {
-    constructor(players, screenElm, eliminationOrder = [], eliminateTimeSep = 1000) {
+    eqSet = (xs, ys) =>
+        xs.size === ys.size &&
+        [...xs].every((x) => ys.has(x));
+
+    constructor(players, screenElm, useProgressiveSquare = true, autoRunning = true, eliminationOrder = [], eliminateTimeSep = 1000) {
         this.players = players;
         this.screenElm = screenElm;
+        this.useProgressiveSquare = useProgressiveSquare;
         this.eliminationOrder = eliminationOrder;
-        this.autoRunning = true;
+        this.autoRunning = autoRunning && eliminationOrder.length > 0;
         this.eliminateTimeSep = eliminateTimeSep;
+
+        let playerIds = this.players.map((_, id) => id);
+        this.canEliminateAll = this.eqSet(new Set(eliminationOrder), new Set(playerIds))
+
         this.refreshScreen();
 
         onresize = () => {
@@ -35,8 +46,7 @@ class Game {
     // cannot be resume because it's not guaranteed that the players are in the same state as before
     restartAuto = () => {
         this.autoRunning = true;
-        this.resurrectAllPlayers();
-        this.refreshScreen();
+        this.reGame();
     };
     toggleAuto = () => {
         if (this.autoRunning) {
@@ -53,14 +63,26 @@ class Game {
     // some squares may be empty if the number of players is not a perfect square (e.g. 37 players, 7x7 grid, 12 empty squares)
     getSquareSideSize = () => Math.ceil(Math.sqrt(this.players.filter((player) => player.isAlive()).length));
 
+    reGame() {
+        let audio = new Audio("sg-sound-effect-rev.ogg");
+        audio.play();
+        audio.addEventListener('ended', () => {
+            this.resurrectAllPlayers();
+            this.refreshScreen();
+        });
+    }
+
     async runEliminateLoop() {
         while (1) {
-            let eliminatedInOrder = true;
+            while (!this.autoRunning) {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
             for (let i = 0; i < this.eliminationOrder.length; i++) {
                 await new Promise(r => setTimeout(r, this.eliminateTimeSep));
 
                 if (!this.autoRunning) {
-                    continue;
+                    break;
                 }
 
                 let playerId = this.eliminationOrder[i];
@@ -68,14 +90,15 @@ class Game {
 
                 if (!eliminated) {
                     console.log(`Player ${playerId} is already dead`);
-                    eliminatedInOrder = false;
                     break;
                 }
             }
-
-            if (eliminatedInOrder) {
+            if (!this.canEliminateAll) {
                 await new Promise(r => setTimeout(r, this.eliminateTimeSep * 3));
+                this.reGame();
             }
+            await new Promise(r => setTimeout(r, this.eliminateTimeSep * 3));
+
         }
     }
 
@@ -119,14 +142,13 @@ class Game {
 
         let squareElm = this.screenElm.querySelector(`[playerId="${playerId}"]`);
         let audio1 = new Audio("sg-sound-effect.ogg");
-        let audio2 = new Audio("sg-sound-effect-rev.ogg");
 
         audio1.play();
         this.players[playerId].setAlive(false);
         if (this.getNumOfAlivePlayers() > 0) {
             squareElm.classList.add("gone");
 
-            if (this.isSquareAlivesNum()) {
+            if (this.useProgressiveSquare && this.isSquareAlivesNum()) {
                 squareElm.addEventListener("transitionend", () => {
                     this.refreshScreen();
                 });
@@ -135,13 +157,9 @@ class Game {
         else {
             // maybe there's a bettet way to do the animation
             audio1.play();
-            audio2.play();
             squareElm.style.scale = "2";
             squareElm.querySelector(".pic").style.filter = "none";
-            audio2.addEventListener('ended', () => {
-                this.resurrectAllPlayers();
-                this.refreshScreen();
-            });
+            this.reGame();
         }
         return true;
     }
@@ -200,7 +218,7 @@ async function main() {
     let players = await genPlayers(CONFIG_PATH);
     let playerIds = players.map((_, id) => id);
     let eliminationOrder = playerIds.sort(() => Math.random() - 0.5);
-    let game = new Game(players, document.getElementById("screen"), eliminationOrder);
+    let game = new Game(players, document.getElementById("screen"), USE_PROGRESSIVE_SQUARE, AUTO_RUNNING, eliminationOrder);
     window.game = game;
 }
 
