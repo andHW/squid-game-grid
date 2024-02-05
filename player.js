@@ -31,7 +31,7 @@ export async function genPlayers(configPath) {
         })
         .catch(() => {
             console.log("config.json not found, using default players");
-            genDefaultPlayers();
+            players = genDefaultPlayers();
         });
     return players;
 }
