@@ -66,6 +66,15 @@ body {
     user-select: none;
 }
 
+#pressAnywhereText {
+    font-size: 2em;
+    position: absolute;
+    top: 1vh;
+    left: 1vh;
+    color: yellow;
+    opacity: 0.65;
+}
+
 .square,
 .pic {
     transition: all .5s;

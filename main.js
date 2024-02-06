@@ -65,11 +65,20 @@ class Game {
 
     reGame() {
         let audio = new Audio("sg-sound-effect-rev.ogg");
-        audio.play();
+        audio.play().then(() => {
+            this.clearPressAnywhereText();
+        });
         audio.addEventListener('ended', () => {
             this.resurrectAllPlayers();
             this.refreshScreen();
         });
+    }
+
+    clearPressAnywhereText() {
+        let pressAnywhereText = document.getElementById("pressAnywhereText");
+        if (pressAnywhereText) {
+            pressAnywhereText.style.display = "none";
+        }
     }
 
     async runEliminateLoop() {
@@ -147,8 +156,12 @@ class Game {
         let squareElm = this.screenElm.querySelector(`[playerId="${playerId}"]`);
         let audio1 = new Audio("sg-sound-effect.ogg");
 
-        audio1.play();
+        audio1.play().then(() => {
+            this.clearPressAnywhereText();
+        });
+
         this.players[playerId].setAlive(false);
+
         if (this.getNumOfAlivePlayers() > 0) {
             squareElm.classList.add("gone");
 
@@ -158,9 +171,9 @@ class Game {
                 });
             }
         }
+        // eliminated last player alive
         else {
             // maybe there's a bettet way to do the animation
-            audio1.play();
             squareElm.style.scale = "2";
             squareElm.querySelector(".pic").style.filter = "none";
             this.reGame();
