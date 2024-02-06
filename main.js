@@ -74,7 +74,7 @@ class Game {
 
     async runEliminateLoop() {
         while (1) {
-            while (!this.autoRunning) {
+            while (!this.autoRunning || !document.hasFocus()) {
                 await new Promise(r => setTimeout(r, 1000));
             }
 
@@ -83,6 +83,10 @@ class Game {
 
                 if (!this.autoRunning) {
                     break;
+                }
+
+                while (!document.hasFocus()) {
+                    await new Promise(r => setTimeout(r, 1000));
                 }
 
                 let playerId = this.eliminationOrder[i];
